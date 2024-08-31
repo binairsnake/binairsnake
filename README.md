@@ -1,8 +1,6 @@
-- 👋 Hi, I’m @binairsnake
-- The name is just for fun
+- 👋 Hi, I’m @binairsnake (just a name)
 - 👀 I’m interested in python coding
 - 🌱 I’m currently learning also python
-- 💞️ I’m looking to collaborate on ...
 - ⚡ Fun fact: retired :), lots of time
 
 <!---
