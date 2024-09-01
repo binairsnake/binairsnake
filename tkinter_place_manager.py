@@ -1,5 +1,8 @@
 import tkinter as tk
 from tkinter import filedialog
+import manual
+import datetime
+
 
 class DragAndDropApp:
     def __init__(self, root):
@@ -9,7 +12,7 @@ class DragAndDropApp:
         # Full-screen weergave
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
-        self.root.geometry(f"{screen_width}x{screen_height}")
+        self.root.geometry(f"{int(screen_width * 1)}x{int(screen_height * 1)}")
 
         self.dragging_widget = None
         self.selected_widget = None
@@ -22,16 +25,21 @@ class DragAndDropApp:
             "Text": 0, "Spinbox": 0
         }  # Houd bij hoeveel exemplaren van elke widget zijn toegevoegd
 
-        # self.widget_name_label = tk.Label(self.root, text="", fg='blue')
-        # self.widget_name_label.place(x=10, y=5)
-
         self.create_frames()
         self.create_widgets_in_left_frame()
         self.create_drag_toggle_button()
         self.create_resize_entries()
         self.create_delete_button()
         self.create_save_button()
+        self.readme()
+        self.version_display()
 
+    def generate_version(self):
+        now = datetime.datetime.now()
+        version2 = now.strftime("%Y.%m.%d.%H%M%S")
+        return version2
+
+    #version = generate_version
 
     def create_frames(self):
         # Bereken de breedtes van de frames
@@ -69,7 +77,7 @@ class DragAndDropApp:
 
         # Plaats de widgets in het linkerframe
         self.widget_name_label = tk.Label(self.left_frame, text="", fg='blue', bg='lightgrey')
-        self.widget_name_label.pack(side="top",pady=20)
+        self.widget_name_label.pack(side="top", pady=20)
         for idx, widget in enumerate(widgets):
             widget.pack(pady=5)
             widget.bind("<Button-1>", self.start_copy)  # Start kopieactie
@@ -78,31 +86,43 @@ class DragAndDropApp:
 
     def create_drag_toggle_button(self):
         # Maak een knop om het verslepen aan/uit te schakelen voor een widget
-        self.toggle_button = tk.Button(self.top_frame, text="Verslepen: Ja", command=self.toggle_drag)
+        self.toggle_button = tk.Button(self.top_frame, text="Dragable: Yes", command=self.toggle_drag)
         self.toggle_button.pack(side="left", padx=10)
 
     def create_resize_entries(self):
-         # Maak invoervelden voor breedte en hoogte
-        tk.Label(self.top_frame, text="Breedte:").pack(side="left", padx=5)
+        # Maak invoervelden voor breedte en hoogte
+        tk.Label(self.top_frame, text="Width:").pack(side="left", padx=5)
         self.width_entry = tk.Entry(self.top_frame, width=5)
         self.width_entry.pack(side="left")
 
-        tk.Label(self.top_frame, text="Hoogte:").pack(side="left", padx=5)
+        tk.Label(self.top_frame, text="Height:").pack(side="left", padx=5)
         self.height_entry = tk.Entry(self.top_frame, width=5)
         self.height_entry.pack(side="left")
 
-        resize_button = tk.Button(self.top_frame, text="Toepassen", command=self.apply_resize)
+        resize_button = tk.Button(self.top_frame, text="Apply", command=self.apply_resize)
         resize_button.pack(side="left", padx=10)
 
     def create_delete_button(self):
         # Voeg een knop toe om de geselecteerde widget te verwijderen
-        delete_button = tk.Button(self.top_frame, text="Verwijder geselecteerde widget", command=self.delete_selected_widget)
+        delete_button = tk.Button(self.top_frame, text="Delete selected widget",
+                                  command=self.delete_selected_widget)
         delete_button.pack(side="left", padx=10)
 
     def create_save_button(self):
         # Voeg een knop toe om de layout op te slaan als een Python-bestand
-        save_button = tk.Button(self.top_frame, text="Opslaan als Python-bestand", command=self.save_as_python)
+        save_button = tk.Button(self.top_frame, text="Save file as Python-file", command=self.save_as_python)
         save_button.pack(side="left", padx=10)
+
+    def readme(self):
+        # Voeg een knop toe om de handleiding weer te geven
+        readme_button = tk.Button(self.top_frame, text="Read Me", command=self.readme_manual)
+        readme_button.pack(side="left", padx=10)
+
+    def version_display(self):
+        version = self.generate_version()
+        version_label=tk.Label(self.top_frame,text=version)
+        version_label.pack(side="right", padx=10)
+
 
     def toggle_drag(self):
         # Wissel de "verslepen"-status van de geselecteerde widget
@@ -110,7 +130,7 @@ class DragAndDropApp:
             current_status = self.draggable_widgets.get(self.selected_widget, True)
             new_status = not current_status
             self.draggable_widgets[self.selected_widget] = new_status
-            self.toggle_button.config(text=f"Verslepen: {'Ja' if new_status else 'Nee'}")
+            self.toggle_button.config(text=f"Dragable: {'Yes' if new_status else 'No'}")
 
     def start_copy(self, event):
         # Start kopieactie voor een widget
@@ -149,7 +169,8 @@ class DragAndDropApp:
             new_widget.bind("<ButtonRelease-1>", self.stop_drag)
             new_widget.bind("<Enter>", self.show_widget_name)
             new_widget.bind("<Leave>", self.hide_widget_name)
-            new_widget.bind("<Button-3>", self.start_resize)  # Rechterklik om te beginnen met het aanpassen van de grootte
+            new_widget.bind("<Button-3>",
+                            self.start_resize)  # Rechterklik om te beginnen met het aanpassen van de grootte
             self.draggable_widgets[new_widget] = True  # Maak standaard versleepbaar
             self.copied_widgets.append(new_widget)  # Voeg de nieuwe widget toe aan de lijst
 
@@ -157,7 +178,7 @@ class DragAndDropApp:
         # Selecteer de widget die aangeklikt wordt
         self.selected_widget = event.widget
         current_status = self.draggable_widgets.get(self.selected_widget, True)
-        self.toggle_button.config(text=f"Verslepen: {'Ja' if current_status else 'Nee'}")
+        self.toggle_button.config(text=f"Dragable: {'Yes' if current_status else 'No'}")
         if current_status:
             self.dragging_widget = self.selected_widget
             self.drag_start_x = event.x
@@ -173,7 +194,7 @@ class DragAndDropApp:
         if self.dragging_widget and self.draggable_widgets.get(self.dragging_widget, True):
             x = self.dragging_widget.winfo_x() - self.drag_start_x + event.x
             y = self.dragging_widget.winfo_y() - self.drag_start_y + event.y
-            self.dragging_widget.place(x=x, y=y)
+            self.dragging_widget.place(x=round(x, -1), y=round(y - 1))
 
     def stop_drag(self, event):
         # Stop het verslepen van de widget
@@ -211,40 +232,54 @@ class DragAndDropApp:
                 file.write("root.geometry('800x600')\n")
                 file.write("frame = tk.Frame(root, bg='red')\n")
                 file.write("frame.pack(fill='both', expand=True)\n")
-
+                widget_counter=1
                 for widget in self.copied_widgets:
                     widget_type = type(widget).__name__
-                    widget_text = widget.cget("text") if widget_type in ["Label", "Button", "Checkbutton", "Radiobutton"] else ""
+                    widget_text = widget.cget("text") if widget_type in ["Label", "Button", "Checkbutton",
+                                                                         "Radiobutton"] else ""
                     x, y = widget.winfo_x(), widget.winfo_y()
                     width, height = widget.winfo_width(), widget.winfo_height()
-
+                    widget_name = f"w{widget_counter}"
                     if widget_type == "Label":
-                        file.write(f"w = tk.Label(frame, text='{widget_text}', bg='{widget.cget('bg')}')\n")
+                        file.write(f"{widget_name} = tk.Label(frame, text='{widget_text}', bg='{widget.cget('bg')}')\n")
                     elif widget_type == "Button":
-                        file.write(f"w = tk.Button(frame, text='{widget_text}', bg='{widget.cget('bg')}')\n")
+                        file.write(f"{widget_name} = tk.Button(frame, text='{widget_text}', bg='{widget.cget('bg')}')\n")
                     elif widget_type == "Entry":
-                        file.write(f"w = tk.Entry(frame)\n")
+                        file.write(f"{widget_name} = tk.Entry(frame)\n")
                     elif widget_type == "Listbox":
-                        file.write(f"w = tk.Listbox(frame)\n")
+                        file.write(f"{widget_name} = tk.Listbox(frame)\n")
                     elif widget_type == "Checkbutton":
-                        file.write(f"w = tk.Checkbutton(frame, text='{widget_text}')\n")
+                        file.write(f"{widget_name} = tk.Checkbutton(frame, text='{widget_text}')\n")
                     elif widget_type == "Radiobutton":
-                        file.write(f"w = tk.Radiobutton(frame, text='{widget_text}')\n")
+                        file.write(f"{widget_name} = tk.Radiobutton(frame, text='{widget_text}')\n")
                     elif widget_type == "Scale":
-                        file.write(f"w = tk.Scale(frame, from_=0, to=10)\n")
+                        file.write(f"{widget_name} = tk.Scale(frame, from_=0, to=10)\n")
                     elif widget_type == "Text":
-                        file.write(f"w = tk.Text(frame, height=3, width=20)\n")
+                        file.write(f"{widget_name} = tk.Text(frame, height=3, width=20)\n")
                     elif widget_type == "Spinbox":
-                        file.write(f"w = tk.Spinbox(frame, from_=0, to=10)\n")
+                        file.write(f"{widget_name} = tk.Spinbox(frame, from_=0, to=10)\n")
 
-                    file.write(f"w.place(x={x}, y={y}, width={width}, height={height})\n")
-
+                    file.write(f"{widget_name}.place(x={x}, y={y}, width={width}, height={height})\n")
+                widget_counter +=1
                 file.write("root.mainloop()\n")
+
+    def readme_manual(self):
+        top_manual = tk.Toplevel(bg='lightyellow', height=400, width=600, bd=2, relief="groove")
+        top_manual.title('The user manual')
+        top_manual.geometry('1000x800+200+100')
+        mytext = manual.uitleg
+        readme_manual = tk.Text(top_manual, bg='lightyellow', width=1000, height=800)
+        readme_manual.place(x=0, y=0)
+        readme_manual.config(state=tk.NORMAL)  # unlock the textbox
+        readme_manual.insert(tk.END, "\n" + mytext)  # add newline and append the data
+        readme_manual.config(state=tk.DISABLED)  # lock back the textbox to readonly
 
     def show_widget_name(self, event):
         # Toon de naam of tekst van de widget als de muis eroverheen gaat
         widget = event.widget
-        widget_text = widget.cget("text") if isinstance(widget, (tk.Label, tk.Button, tk.Checkbutton, tk.Radiobutton)) else str(widget)
+        widget_text = widget.cget("text") if isinstance(widget,
+                                                        (tk.Label, tk.Button, tk.Checkbutton, tk.Radiobutton)) else str(
+            widget)
         self.widget_name_label.config(text=f"Widget: {widget_text}")
 
     def hide_widget_name(self, event):
